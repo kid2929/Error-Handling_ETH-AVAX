@@ -1,80 +1,78 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-/**
- * @title ErrorHandlingExample
- * @dev This contract demonstrates the use of require(), assert(), and revert() statements.
- * @author [Vardaan Gill]
+/*
+ * @dev Demonstrates the use of require(), assert(), and revert() statements.
+ * Author: Vardaan Gill
  */
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
+
 contract ErrorHandlingExample {
     address public owner;
     uint public balance;
 
-    /**
-     * @dev Constructor initializes the contract.
-     */
     constructor() {
+        // Set the owner to the contract deployer
         owner = msg.sender;
         balance = 0;
     }
 
-    // Function to deposit ether into the contract
+    /**
+     * Deposit ether into the contract.
+     */
     function deposit() public payable {
         balance += msg.value;
         emit DepositMade(msg.sender, msg.value);
     }
 
-    // Function to withdraw ether from the contract
+    /**
+     * Withdraw ether from the contract.
+     * @param amount The amount of ether to withdraw.
+     */
     function withdraw(uint amount) public {
-        // Use require() to check if the caller is the owner
-        require(msg.sender == owner, "Caller is not the owner");
+        if (msg.sender != owner) {
+            revert("Only the owner can withdraw funds");
+        }
 
-        // Use require() to check if the contract has enough balance
-        require(balance >= amount, "Insufficient balance in contract");
+        if (balance < amount) {
+            revert("Insufficient balance in contract");
+        }
 
-        // Use revert() if the amount is zero (additional check)
         if (amount == 0) {
             revert("Withdrawal amount must be greater than zero");
         }
 
-        // Reduce balance and transfer the amount to the owner
         balance -= amount;
         payable(owner).transfer(amount);
         emit WithdrawalMade(msg.sender, amount);
     }
 
-    // Function to change the owner
+    /**
+     * Change the owner of the contract.
+     * @param newOwner The address of the new owner.
+     */
     function changeOwner(address newOwner) public {
-        // Use require() to check if the caller is the current owner
-        require(msg.sender == owner, "Caller is not the owner");
+        if (msg.sender != owner) {
+            revert("Only the owner can change the owner");
+        }
 
-        // Use assert() to ensure the new owner is not the zero address
-        assert(newOwner!= address(0));
+        if (newOwner == address(0)) {
+            revert("New owner cannot be the zero address");
+        }
 
         owner = newOwner;
         emit OwnerChanged(newOwner);
     }
 
-    // Function to demonstrate the use of assert() for invariant checking
-    function checkInvariant() public view {
-        // Use assert() to check an invariant
-        assert(balance >= 0);
-    }
-
-    // Event to log deposit transactions
-    event DepositMade(address sender, uint amount);
-
-    // Event to log withdrawal transactions
-    event WithdrawalMade(address sender, uint amount);
-
-    // Event to log owner changes
-    event OwnerChanged(address newOwner);
-
     /**
-     * @dev Function to check the balance of the contract.
+     * Check the balance of the contract.
      * @return The balance of the contract.
      */
     function getBalance() public view returns (uint) {
         return balance;
     }
+
+    // Events
+    event DepositMade(address indexed sender, uint amount);
+    event WithdrawalMade(address indexed sender, uint amount);
+    event OwnerChanged(address indexed newOwner);
 }
