@@ -1,106 +1,112 @@
-# ErrorHandlingExample Solidity Contract
+# ExampleContract
 
 ## Overview
+`ExampleContract` is a smart contract written in Solidity for the Ethereum blockchain. This contract provides functionalities such as setting and resetting a value, updating the owner, managing balances, and transferring funds between addresses. The contract also emits events to log significant actions.
 
-The `ErrorHandlingExample` contract demonstrates the use of `require()`, `assert()`, and `revert()` statements for error handling in Solidity. The contract allows the owner to deposit and withdraw ether, and includes functionality to change the contract owner and check the contract balance.
+## Features
+- **Value Management**: Set, reset, and check the value with conditions.
+- **Ownership Management**: Update and manage the contract owner.
+- **Balance Management**: Deposit, withdraw, and transfer balances.
+- **Event Emissions**: Emit events on significant actions to log changes.
 
 ## License
-
-This contract is licensed under the MIT License.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Prerequisites
-
 - Solidity ^0.8.26
-- Ethereum wallet or any Ethereum development environment (e.g., Remix, Truffle, Hardhat)
-
-## Installation
-
-1. **Using Remix:**
-   - Open [Remix](https://remix.ethereum.org/).
-   - Create a new file and copy the contract code into it.
-   - Compile the contract using the Solidity compiler version ^0.8.26.
-   - Deploy the contract.
-
-2. **Using Truffle or Hardhat:**
-   - Install Truffle or Hardhat.
-   - Create a new project and add this contract to your project's contracts directory.
-   - Compile and deploy the contract using the respective framework's deployment scripts.
 
 ## Contract Details
 
 ### State Variables
+- `uint256 public value`: Stores a value.
+- `address public owner`: Stores the address of the contract owner.
+- `mapping(address => uint256) public balances`: Maps addresses to their balances.
+- `uint256 public constant MAX_UINT`: The maximum value of a `uint256`.
 
-- `address public owner`: The address of the contract owner.
-- `uint public balance`: The balance of ether held by the contract.
+### Events
+- `event ValueChanged(uint256 newValue)`: Emitted when `value` is changed.
+- `event OwnerChanged(address indexed oldOwner, address indexed newOwner)`: Emitted when the owner is changed.
+- `event BalanceUpdated(address indexed user, uint256 newBalance)`: Emitted when a user's balance is updated.
 
 ### Constructor
-
-- `constructor()`: Initializes the contract, setting the deployer as the owner and the initial balance to 0.
+- `constructor()`: Initializes the contract by setting the `msg.sender` as the owner and assigning an initial balance of 1000 to the owner.
 
 ### Functions
 
-1. `deposit() public payable`
-   - Allows any user to deposit ether into the contract.
-   - Emits a `DepositMade` event.
+#### `setValue(uint256 _value)`
+Sets the value with a requirement that it must be greater than zero.
+```solidity
+function setValue(uint256 _value) public
+```
+- Emits `ValueChanged`.
 
-2. `withdraw(uint amount) public`
-   - Allows the owner to withdraw a specified amount of ether from the contract.
-   - Reverts if the caller is not the owner, if the contract has insufficient balance, or if the withdrawal amount is zero.
-   - Emits a `WithdrawalMade` event.
+#### `updateOwner(address _newOwner)`
+Updates the owner to a new address. Only the current owner can call this function.
+```solidity
+function updateOwner(address _newOwner) public
+```
+- Emits `OwnerChanged`.
 
-3. `changeOwner(address newOwner) public`
-   - Allows the owner to change the ownership of the contract to a new owner.
-   - Reverts if the caller is not the owner or if the new owner address is the zero address.
-   - Emits an `OwnerChanged` event.
+#### `resetValue()`
+Resets the value to zero. Only the owner can call this function.
+```solidity
+function resetValue() public
+```
+- Emits `ValueChanged`.
 
-4. `getBalance() public view returns (uint)`
-   - Returns the current balance of the contract.
+#### `transfer(address _to, uint256 _amount)`
+Transfers a specified amount of balance from the caller to another address. Requires sufficient balance and a valid recipient address.
+```solidity
+function transfer(address _to, uint256 _amount) public
+```
+- Emits `BalanceUpdated` for both sender and recipient.
 
-### Events
+#### `deposit(uint256 _amount)`
+Deposits a specified amount into the caller's balance. Requires the amount to be greater than zero.
+```solidity
+function deposit(uint256 _amount) public
+```
+- Emits `BalanceUpdated`.
 
-- `event DepositMade(address indexed sender, uint amount)`: Emitted when ether is deposited into the contract.
-- `event WithdrawalMade(address indexed sender, uint amount)`: Emitted when ether is withdrawn from the contract.
-- `event OwnerChanged(address indexed newOwner)`: Emitted when the owner is changed.
+#### `withdraw(uint256 _amount)`
+Withdraws a specified amount from the caller's balance. Requires sufficient balance.
+```solidity
+function withdraw(uint256 _amount) public
+```
+- Emits `BalanceUpdated`.
+
+#### `checkInvariant()`
+Checks the invariant that the owner's balance should not fall below 1000.
+```solidity
+function checkInvariant() public view
+```
 
 ## Usage
+1. Deploy the contract using a Solidity-compatible development environment.
+2. Interact with the contract functions via a web3 interface or a Solidity development tool like Remix.
 
-1. **Depositing Ether:**
-   - Call the `deposit` function from any Ethereum wallet or interface to send ether to the contract.
+### Example
+```javascript
+const exampleContract = await ExampleContract.deployed();
+await exampleContract.setValue(42);
+await exampleContract.updateOwner(newOwnerAddress);
+await exampleContract.deposit(500);
+await exampleContract.transfer(recipientAddress, 200);
+await exampleContract.withdraw(100);
+const ownerBalance = await exampleContract.balances(ownerAddress);
+```
 
-2. **Withdrawing Ether:**
-   - The owner can call the `withdraw` function with the desired amount to withdraw ether from the contract.
+## Testing
+Ensure to test the contract thoroughly in a development environment. Consider edge cases and scenarios such as invalid inputs and unauthorized access attempts.
 
-3. **Changing Owner:**
-   - The owner can call the `changeOwner` function with the new owner's address to transfer ownership.
+## Security Considerations
+- Validate inputs rigorously to avoid unexpected behaviors.
+- Ensure only the owner can perform sensitive operations like resetting value or updating the owner.
+- Regularly audit the contract for vulnerabilities and update as necessary.
 
-4. **Checking Balance:**
-   - Any user can call the `getBalance` function to check the contract's current balance.
+## Contribution
+Feel free to fork this repository and submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
 
-## Example
-
-Here's an example of how to interact with the contract using Remix:
-
-1. **Deploying the Contract:**
-   - Copy the contract code into a new file in Remix.
-   - Compile and deploy the contract.
-   - The deployer's address will be set as the owner.
-
-2. **Depositing Ether:**
-   - Select the deployed contract and use the `deposit` function.
-   - Specify the amount of ether to deposit in the "Value" field and confirm the transaction.
-
-3. **Withdrawing Ether:**
-   - Ensure you are connected with the owner's address.
-   - Use the `withdraw` function with the amount of ether to withdraw.
-   - Confirm the transaction.
-
-4. **Changing Owner:**
-   - Use the `changeOwner` function with the new owner's address.
-   - Confirm the transaction.
-
-5. **Checking Balance:**
-   - Use the `getBalance` function to view the contract's balance.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Acknowledgements
+- OpenZeppelin for their extensive library of secure smart contract templates.
+- Ethereum community for continuous support and innovation.
