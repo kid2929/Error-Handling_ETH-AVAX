@@ -1,7 +1,3 @@
-Certainly! Here's the complete README file for the `SimpleVotingSystem` smart contract:
-
----
-
 ### Simple Voting System Smart Contract
 
 #### Description
