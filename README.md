@@ -30,9 +30,6 @@ This project is licensed under the MIT License. See the [LICENSE](./LICENSE) fil
 #### Usage
 To use this smart contract, deploy it on a compatible Ethereum blockchain using Solidity compiler version `^0.8.26` or higher.
 
-#### Developer
-- Developed by [Your Name]
-
 #### Contributions
 Contributions are welcome. Please fork the repository, make changes, and submit a pull request.
 
