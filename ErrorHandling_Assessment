@@ -26,20 +26,19 @@ contract TaskManagementSystem {
     modifier onlyOwner() {
         require(msg.sender == owner, "Only the owner can perform this action");
         _;
-       }
+    }
 
     // Modifier to check if task exists
     modifier taskExists(uint256 taskId) {
         require(taskId < taskCount, "Task does not exist");
         _;
-      }
+    }
 
     // Constructor to set the owner of the contract
     constructor() {
         owner = msg.sender;
         balances[owner] = 1000; // Initial balance for the owner
-        
-         }
+    }
 
     // Create a new task
     function createTask(string memory description, uint256 reward) public onlyOwner {
@@ -49,17 +48,16 @@ contract TaskManagementSystem {
         tasks[taskCount] = Task(description, address(0), reward, false);
         emit TaskCreated(taskCount, description, reward);
         taskCount++;
-          }
+    }
 
     // Assign a task to a user
     function assignTask(uint256 taskId, address assignee) public onlyOwner taskExists(taskId) {
-        require(assignee!= address(0), "Invalid address");
+        require(assignee != address(0), "Invalid address");
         require(!tasks[taskId].completed, "Task already completed");
 
         tasks[taskId].assignedTo = assignee;
         emit TaskAssigned(taskId, assignee);
-        
-            }
+    }
 
     // Mark a task as completed
     function completeTask(uint256 taskId) public taskExists(taskId) {
@@ -72,7 +70,7 @@ contract TaskManagementSystem {
 
         emit TaskCompleted(taskId);
         emit BalanceUpdated(msg.sender, balances[msg.sender]);
-         }
+    }
 
     // Deposit balance
     function deposit(uint256 amount) public {
@@ -80,8 +78,7 @@ contract TaskManagementSystem {
 
         balances[msg.sender] += amount;
         emit BalanceUpdated(msg.sender, balances[msg.sender]);
-      
-        }
+    }
 
     // Withdraw balance
     function withdraw(uint256 amount) public {
@@ -89,18 +86,38 @@ contract TaskManagementSystem {
 
         balances[msg.sender] -= amount;
         emit BalanceUpdated(msg.sender, balances[msg.sender]);
-        
-        }
+    }
 
     // Transfer balance to another address
     function transfer(address to, uint256 amount) public {
         require(balances[msg.sender] >= amount, "Insufficient balance");
-        require(to!= address(0), "Invalid address");
+        require(to != address(0), "Invalid address");
 
         balances[msg.sender] -= amount;
         balances[to] += amount;
 
         emit BalanceUpdated(msg.sender, balances[msg.sender]);
         emit BalanceUpdated(to, balances[to]);
+    }
+
+    // Test function to trigger "Only the owner can perform this action" error
+    function testOnlyOwnerError() public {
+        // Try to create a task as a non-owner
+        require(msg.sender != owner, "This function is for non-owner testing only");
+        createTask("Test Task", 1); // This should fail
+    }
+
+    // Test function to trigger "Task does not exist" error
+    function testTaskExistsError() public {
+        // Try to assign a task that doesn't exist
+        assignTask(taskCount + 1, msg.sender); // This should fail
+    }
+
+    // Test function to trigger "Only the assigned user can complete this task" error
+    function testOnlyAssignedUserError(uint256 taskId) public {
+        // Try to complete a task assigned to someone else
+        require(taskId < taskCount, "Invalid taskId");
+        require(tasks[taskId].assignedTo != msg.sender, "This function is for non-assigned user testing only");
+        completeTask(taskId); // This should fail
     }
 }
