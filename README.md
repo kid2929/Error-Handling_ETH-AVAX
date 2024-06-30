@@ -3,10 +3,20 @@
 ## Overview
 The `TaskManagementSystem` is a Solidity-based smart contract designed for managing tasks with rewards on the Ethereum blockchain. This contract allows an owner to create tasks, assign them to users, and reward users upon task completion. It also provides functionalities for users to manage their balances.
 
+## Table of Contents
+1. [Prerequisites](#prerequisites)
+2. [Contract Details](#contract-details)
+3. [Deployment](#deployment)
+4. [Example Usage](#example-usage)
+5. [Error Handling](#error-handling)
+6. [License](#license)
+
 ## Prerequisites
 - Solidity version: ^0.8.26
 - Ethereum development environment (e.g., Truffle, Hardhat)
 - Ethereum client (e.g., Ganache for local testing)
+- Node.js and npm (for setting up Truffle or Hardhat)
+- Metamask or another Ethereum wallet
 
 ## Contract Details
 
@@ -87,6 +97,33 @@ To deploy the contract:
     ```solidity
     taskManagementSystem.transfer(anotherUserAddress, 100);
     ```
+
+## Error Handling
+To ensure robust operation, the contract includes several error handling mechanisms, demonstrated through test functions. These test functions can be called to verify that the contract correctly handles various error conditions:
+
+1. **testOnlyOwnerError**: Attempts to create a task as a non-owner, triggering the "Only the owner can perform this action" error.
+   ```solidity
+   function testOnlyOwnerError() public {
+       require(msg.sender != owner, "This function is for non-owner testing only");
+       createTask("Test Task", 1); // This should fail
+   }
+   ```
+
+2. **testTaskExistsError**: Attempts to assign a non-existent task, triggering the "Task does not exist" error.
+   ```solidity
+   function testTaskExistsError() public {
+       assignTask(taskCount + 1, msg.sender); // This should fail
+   }
+   ```
+
+3. **testOnlyAssignedUserError**: Attempts to complete a task not assigned to the user, triggering the "Only the assigned user can complete this task" error.
+   ```solidity
+   function testOnlyAssignedUserError(uint256 taskId) public {
+       require(taskId < taskCount, "Invalid taskId");
+       require(tasks[taskId].assignedTo != msg.sender, "This function is for non-assigned user testing only");
+       completeTask(taskId); // This should fail
+   }
+   ```
 
 ## License
 This project is licensed under the MIT License.
